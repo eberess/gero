@@ -1,0 +1,8 @@
+GERO Project (Ground Expert Robot Operator)
+Copyright 2026 [Amin Beressa / Vincent Bommert]
+
+This product includes software developed at:
+- Unitree Robotics (Unitree SDK 2.0 - BSD-3-Clause)
+- Google DeepMind (MuJoCo Physics Engine - Apache 2.0)
+- The OpenCV Foundation (OpenCV - Apache 2.0)
+- Python Software Foundation (Python - PSF License)

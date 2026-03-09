@@ -1,0 +1,35 @@
+# --- Système & OS ---
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+
+# --- Python & Environnement ---
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+.venv
+env/
+build/
+dist/
+*.egg-info/
+
+# --- Simulation & Robotique (MuJoCo/Unitree) ---
+*.out
+*.npy
+*.npz
+/simulation/recordings/
+
+# --- IDE & Configuration ---
+.vscode/
+.idea/
+*.swp
+
+# --- Sécurité  ---
+# Fichiers contenant des tokens, mots de passe ou configs réseau du G1
+secrets/
+config/credentials.yaml
+*.pem
+*.key
