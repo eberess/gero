@@ -14,11 +14,11 @@ GERO (Ground Expert Robot Operator) est un projet de R&D axé sur le déploiemen
 ## Table des Matières
 
 1. [Vision du Projet](#-vision-du-projet)
-2. [Stack Technique](#-stack-technique-lab-standards)
+2. [Stack Technique](#-stack-technique)
 3. [Architecture Logicielle](#-architecture-logicielle)
 4. [Feuille de Route (Roadmap)](#-feuille-de-route-roadmap)
 5. [Structure du Dépôt](#-structure-du-dépôt)
-6. [Installation & Usage](#-installation--usage)
+6. [Installation & Usage](#-installation-usage)
 
 ---
 
@@ -52,7 +52,7 @@ Le projet GERO repose sur une architecture découplée pour garantir la sécurit
 
 ```bash
 # Clone le dépôt
-git clone [git@github.com:eberess/gero.git](git@github.com:eberess/gero.git)
+git clone git@github.com:eberess/gero.git
 
 # Build de l'environnement Lab (Docker)
 docker build -t gero-lab:latest .
