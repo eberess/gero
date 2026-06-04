@@ -1,0 +1,11 @@
+services:
+  gero-google-map-tools:
+    build: .
+    container_name: gero-google-map-tools
+    ports:
+      - "8002:8002"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    restart: unless-stopped
