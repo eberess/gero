@@ -67,12 +67,16 @@ class AirlabsClient:
     BASE_URL = "https://airlabs.co/api/v9"
 
     def __init__(self, api_key: str):
-        self.api_key = api_key
+        self._init_key = api_key
+
+    def _key(self) -> str:
+        return self._init_key or os.environ.get("AIRLABS_API_KEY", "")
 
     async def _get(self, path: str, params: dict[str, Any]) -> dict:
-        if not self.api_key or self.api_key == "your_airlabs_api_key_here":
+        key = self._key()
+        if not key or key == "your_airlabs_api_key_here":
             return {"error": "API key is missing or invalid. Please configure the .env file."}
-        params["api_key"] = self.api_key
+        params["api_key"] = key
         async with httpx.AsyncClient(timeout=10.0) as client:
             try:
                 response = await client.get(f"{self.BASE_URL}{path}", params=params)

@@ -13,10 +13,14 @@ class GoogleMapsClient:
     """Async client for the Google Maps Platform APIs."""
 
     def __init__(self, api_key: str):
-        self.api_key = api_key
+        self._init_key = api_key
+
+    def _key(self) -> str:
+        return self._init_key or os.environ.get("GOOGLE_MAPS_API_KEY", "")
 
     def _invalid_key(self) -> bool:
-        return not self.api_key or self.api_key == "your_google_maps_api_key_here"
+        k = self._key()
+        return not k or k == "your_google_maps_api_key_here"
 
     async def _get(self, url: str, params: dict[str, Any]) -> dict:
         if self._invalid_key():
@@ -38,7 +42,7 @@ class GoogleMapsClient:
         if self._invalid_key():
             return {"error": "API key is missing or invalid. Please configure the .env file."}
         headers = {
-            "X-Goog-Api-Key": self.api_key,
+            "X-Goog-Api-Key": self._key(),
             "X-Goog-FieldMask": field_mask,
             "Content-Type": "application/json",
         }
@@ -111,7 +115,7 @@ class GoogleMapsClient:
             "rating,userRatingCount"
         )
         headers = {
-            "X-Goog-Api-Key": self.api_key,
+            "X-Goog-Api-Key": self._key(),
             "X-Goog-FieldMask": field_mask,
         }
         async with httpx.AsyncClient(timeout=10.0) as client:
@@ -125,7 +129,7 @@ class GoogleMapsClient:
                 return {"error": "Internal client error", "details": str(e)}
 
     async def geocode(self, address: str) -> dict:
-        data = await self._get(_GEOCODING_BASE, {"address": address, "key": self.api_key})
+        data = await self._get(_GEOCODING_BASE, {"address": address, "key": self._key()})
         if "error" in data:
             return data
         results = data.get("results", [])
@@ -140,7 +144,7 @@ class GoogleMapsClient:
         }
 
     async def reverse_geocode(self, lat: float, lng: float) -> dict:
-        data = await self._get(_GEOCODING_BASE, {"latlng": f"{lat},{lng}", "key": self.api_key})
+        data = await self._get(_GEOCODING_BASE, {"latlng": f"{lat},{lng}", "key": self._key()})
         if "error" in data:
             return data
         results = data.get("results", [])
@@ -193,7 +197,7 @@ class GoogleMapsClient:
         destinations_str = "|".join(f"{d['lat']},{d['lng']}" for d in destinations)
         data = await self._get(
             _DISTANCEMATRIX_BASE,
-            {"origins": origins_str, "destinations": destinations_str, "mode": mode, "key": self.api_key},
+            {"origins": origins_str, "destinations": destinations_str, "mode": mode, "key": self._key()},
         )
         if "error" in data:
             return data
