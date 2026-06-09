@@ -1,5 +1,5 @@
 [project]
-name = "gero-google-map-tools"
+name = "gero-fly"
 version = "1.0.0"
 requires-python = ">=3.11"
 dependencies = [
