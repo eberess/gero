@@ -6,7 +6,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy.orm import Session
 from app.database import init_db, get_db
 from app.models import (
-    CampaignCreate, CampaignOut, CampaignDB, CampaignStatus,
+    CampaignCreate, CampaignUpdate, StatusUpdate, CampaignOut, CampaignDB, CampaignStatus,
     ShopCreate, ShopOut, ShopDB,
     RecommendationRequest, RecommendationResponse, AdRecommendation,
     LoginRequest, TokenResponse, UserOut, UserDB, UserRole,
@@ -240,6 +240,66 @@ def get_campaign(
     if current_user.role == UserRole.MERCHANT and current_user.shop_name and c.shop_name != current_user.shop_name:
         raise HTTPException(status_code=403, detail="Accès refusé")
     return c
+
+
+@app.put("/api/ads/campaign/{campaign_id}", response_model=CampaignOut)
+def update_campaign(
+    campaign_id: int,
+    c: CampaignUpdate,
+    db: Session = Depends(get_db),
+    current_user: UserDB = Depends(require_role(UserRole.ADMIN, UserRole.MERCHANT)),
+):
+    existing = db.query(CampaignDB).filter(CampaignDB.id == campaign_id).first()
+    if not existing:
+        raise HTTPException(status_code=404, detail="Campagne introuvable")
+    if current_user.role == UserRole.MERCHANT and current_user.shop_name and existing.shop_name != current_user.shop_name:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    update_data = c.model_dump(exclude_unset=True)
+    if "keywords" in update_data and update_data["keywords"] is not None:
+        update_data["keywords"] = ",".join(update_data["keywords"])
+    if "zone" in update_data and update_data["zone"] is not None:
+        update_data["zone"] = update_data["zone"].value
+    if "strategy" in update_data and update_data["strategy"] is not None:
+        update_data["strategy"] = update_data["strategy"].value
+    for key, value in update_data.items():
+        setattr(existing, key, value)
+    db.commit()
+    db.refresh(existing)
+    return existing
+
+
+@app.delete("/api/ads/campaign/{campaign_id}")
+def delete_campaign(
+    campaign_id: int,
+    db: Session = Depends(get_db),
+    current_user: UserDB = Depends(require_role(UserRole.ADMIN, UserRole.MERCHANT)),
+):
+    existing = db.query(CampaignDB).filter(CampaignDB.id == campaign_id).first()
+    if not existing:
+        raise HTTPException(status_code=404, detail="Campagne introuvable")
+    if current_user.role == UserRole.MERCHANT and current_user.shop_name and existing.shop_name != current_user.shop_name:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    db.delete(existing)
+    db.commit()
+    return {"detail": "Campagne supprimée"}
+
+
+@app.patch("/api/ads/campaign/{campaign_id}/status", response_model=CampaignOut)
+def patch_campaign_status(
+    campaign_id: int,
+    s: StatusUpdate,
+    db: Session = Depends(get_db),
+    current_user: UserDB = Depends(require_role(UserRole.ADMIN, UserRole.MERCHANT)),
+):
+    existing = db.query(CampaignDB).filter(CampaignDB.id == campaign_id).first()
+    if not existing:
+        raise HTTPException(status_code=404, detail="Campagne introuvable")
+    if current_user.role == UserRole.MERCHANT and current_user.shop_name and existing.shop_name != current_user.shop_name:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    existing.status = s.status.value
+    db.commit()
+    db.refresh(existing)
+    return existing
 
 
 @app.get("/api/ads/stats", response_model=dict)

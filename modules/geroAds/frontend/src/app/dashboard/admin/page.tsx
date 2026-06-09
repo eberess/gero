@@ -1,9 +1,14 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import AuthGuard from '@/components/AuthGuard'
+import StatCard from '@/components/StatCard'
+import StatusBadge from '@/components/StatusBadge'
+import PageHeader from '@/components/PageHeader'
 import { fetchCampaigns, fetchStats, fetchUsers, Campaign, Stats, User } from '@/lib/api'
 
 export default function AdminDashboard() {
+  const router = useRouter()
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [users, setUsers] = useState<User[]>([])
@@ -14,34 +19,25 @@ export default function AdminDashboard() {
     fetchUsers().then(setUsers).catch(console.error)
   }, [])
 
+  const activeCount = campaigns.filter(c => c.status === 'active').length
+  const totalBudget = campaigns.reduce((s, c) => s + c.budget_cents, 0) / 100
+
   return (
     <AuthGuard role="admin">
       <div className="container">
-        <h1>Administration ADP</h1>
+        <PageHeader title="Administration ADP" />
 
         {stats && (
-          <div className="grid">
-            <div className="card">
-              <div className="stat-value">{stats.active_campaigns}</div>
-              <div className="stat-label">Campagnes actives</div>
-            </div>
-            <div className="card">
-              <div className="stat-value">{stats.total_campaigns}</div>
-              <div className="stat-label">Campagnes totales</div>
-            </div>
-            <div className="card">
-              <div className="stat-value">{stats.total_impressions}</div>
-              <div className="stat-label">Impressions générées</div>
-            </div>
-            <div className="card">
-              <div className="stat-value">{stats.total_budget_eur.toFixed(2)} €</div>
-              <div className="stat-label">Budget total engagé</div>
-            </div>
+          <div className="grid" style={{ marginBottom: '2rem' }}>
+            <StatCard icon="campaign" value={stats.active_campaigns} label="Campagnes actives" color="#1e7e34" />
+            <StatCard icon="list_alt" value={stats.total_campaigns} label="Campagnes totales" />
+            <StatCard icon="visibility" value={stats.total_impressions} label="Impressions générées" color="#7b1fa2" />
+            <StatCard icon="account_balance" value={`${stats.total_budget_eur.toFixed(2)} €`} label="Budget total engagé" color="#ea8600" />
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '2rem' }}>
-          <div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem' }}>
+          <div className="card">
             <h2>Commerçants</h2>
             <table>
               <thead>
@@ -54,16 +50,23 @@ export default function AdminDashboard() {
               <tbody>
                 {users.map(u => (
                   <tr key={u.id}>
-                    <td>{u.email}</td>
+                    <td style={{ fontSize: '0.8rem' }}>{u.email}</td>
                     <td>{u.shop_name || '-'}</td>
-                    <td><span className="badge" style={{background: u.role === 'admin' ? '#e8eaf6' : '#fff3e0'}}>{u.role}</span></td>
+                    <td>
+                      <span className="badge" style={{
+                        background: u.role === 'admin' ? '#e8eaf6' : '#fff3e0',
+                        color: u.role === 'admin' ? '#283593' : '#e65100',
+                      }}>
+                        {u.role === 'admin' ? 'ADP' : 'Commerçant'}
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          <div>
+          <div className="card">
             <h2>Dernières campagnes</h2>
             <table>
               <thead>
@@ -75,10 +78,10 @@ export default function AdminDashboard() {
               </thead>
               <tbody>
                 {campaigns.slice(0, 10).map(c => (
-                  <tr key={c.id}>
-                    <td>{c.shop_name}</td>
+                  <tr key={c.id} style={{ cursor: 'pointer' }} onClick={() => router.push(`/campaigns/${c.id}`)}>
+                    <td style={{ fontWeight: 500 }}>{c.shop_name}</td>
                     <td>{(c.budget_cents / 100).toFixed(2)} €</td>
-                    <td><span className={`badge ${c.status}`}>{c.status}</span></td>
+                    <td><StatusBadge status={c.status} /></td>
                   </tr>
                 ))}
               </tbody>

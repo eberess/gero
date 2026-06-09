@@ -94,6 +94,23 @@ class CampaignCreate(BaseModel):
     ends_at: Optional[datetime] = None
 
 
+class CampaignUpdate(BaseModel):
+    advertiser: Optional[str] = None
+    shop_name: Optional[str] = None
+    zone: Optional[Zone] = None
+    keywords: Optional[List[str]] = None
+    budget_cents: Optional[int] = None
+    bid_cents: Optional[int] = None
+    strategy: Optional[BidStrategy] = None
+    daily_max_cents: Optional[int] = None
+    starts_at: Optional[datetime] = None
+    ends_at: Optional[datetime] = None
+
+
+class StatusUpdate(BaseModel):
+    status: CampaignStatus
+
+
 class CampaignOut(BaseModel):
     id: int
     advertiser: str

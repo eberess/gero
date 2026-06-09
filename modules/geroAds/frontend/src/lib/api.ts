@@ -100,6 +100,50 @@ export async function createCampaign(data: Record<string, unknown>): Promise<Cam
   return res.json()
 }
 
+export async function fetchCampaign(id: number): Promise<Campaign> {
+  const res = await fetch(`${API_BASE}/api/ads/campaign/${id}`, { headers: authHeaders() })
+  if (!res.ok) throw new Error('Campagne introuvable')
+  return res.json()
+}
+
+export async function updateCampaign(id: number, data: Record<string, unknown>): Promise<Campaign> {
+  const res = await fetch(`${API_BASE}/api/ads/campaign/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) throw new Error('Échec de la mise à jour')
+  return res.json()
+}
+
+export async function deleteCampaign(id: number): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/ads/campaign/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  })
+  if (!res.ok) throw new Error('Échec de la suppression')
+}
+
+export async function patchCampaignStatus(id: number, status: string): Promise<Campaign> {
+  const res = await fetch(`${API_BASE}/api/ads/campaign/${id}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ status }),
+  })
+  if (!res.ok) throw new Error('Échec du changement de statut')
+  return res.json()
+}
+
+export async function createShop(data: Record<string, unknown>): Promise<Shop> {
+  const res = await fetch(`${API_BASE}/api/shops`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) throw new Error('Failed to create shop')
+  return res.json()
+}
+
 export async function fetchShops(): Promise<Shop[]> {
   const res = await fetch(`${API_BASE}/api/shops`, { headers: authHeaders() })
   if (!res.ok) throw new Error('Failed to fetch shops')

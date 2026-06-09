@@ -1,10 +1,14 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import AuthGuard from '@/components/AuthGuard'
+import StatCard from '@/components/StatCard'
+import StatusBadge from '@/components/StatusBadge'
+import PageHeader from '@/components/PageHeader'
 import { fetchCampaigns, fetchMerchantStats, Campaign, Stats } from '@/lib/api'
-import Link from 'next/link'
 
 export default function MerchantDashboard() {
+  const router = useRouter()
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
 
@@ -16,59 +20,46 @@ export default function MerchantDashboard() {
   return (
     <AuthGuard role="merchant">
       <div className="container">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1>Mon tableau de bord</h1>
-          <Link href="/campaigns/create"><button className="btn btn-primary">+ Nouvelle campagne</button></Link>
-        </div>
+        <PageHeader title="Mon tableau de bord" actionLabel="Nouvelle campagne" actionHref="/campaigns/create" />
 
         {stats && (
-          <div className="grid">
-            <div className="card">
-              <div className="stat-value">{stats.active_campaigns}</div>
-              <div className="stat-label">Campagnes actives</div>
-            </div>
-            <div className="card">
-              <div className="stat-value">{stats.total_campaigns}</div>
-              <div className="stat-label">Campagnes totales</div>
-            </div>
-            <div className="card">
-              <div className="stat-value">{stats.total_impressions}</div>
-              <div className="stat-label">Impressions</div>
-            </div>
-            <div className="card">
-              <div className="stat-value">{stats.total_budget_eur.toFixed(2)} €</div>
-              <div className="stat-label">Budget total</div>
-            </div>
+          <div className="grid" style={{ marginBottom: '2rem' }}>
+            <StatCard icon="campaign" value={stats.active_campaigns} label="Campagnes actives" color="#1e7e34" />
+            <StatCard icon="list_alt" value={stats.total_campaigns} label="Campagnes totales" />
+            <StatCard icon="visibility" value={stats.total_impressions} label="Impressions" color="#7b1fa2" />
+            <StatCard icon="account_balance" value={`${stats.total_budget_eur.toFixed(2)} €`} label="Budget total" color="#ea8600" />
           </div>
         )}
 
-        <h2 style={{ marginTop: '2rem' }}>Mes campagnes</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Enseigne</th>
-              <th>Zone</th>
-              <th>Budget</th>
-              <th>Enchère</th>
-              <th>Stratégie</th>
-              <th>Statut</th>
-              <th>Début</th>
-            </tr>
-          </thead>
-          <tbody>
-            {campaigns.map(c => (
-              <tr key={c.id}>
-                <td>{c.shop_name}</td>
-                <td>{c.zone}</td>
-                <td>{(c.budget_cents / 100).toFixed(2)} €</td>
-                <td>{(c.bid_cents / 100).toFixed(2)} €</td>
-                <td>{c.strategy}</td>
-                <td><span className={`badge ${c.status}`}>{c.status}</span></td>
-                <td>{new Date(c.starts_at).toLocaleDateString()}</td>
+        <div className="card">
+          <h2>Mes campagnes</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Enseigne</th>
+                <th>Zone</th>
+                <th>Budget</th>
+                <th>Enchère</th>
+                <th>Stratégie</th>
+                <th>Statut</th>
+                <th>Début</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {campaigns.map(c => (
+                <tr key={c.id} style={{ cursor: 'pointer' }} onClick={() => router.push(`/campaigns/${c.id}`)}>
+                  <td style={{ fontWeight: 500 }}>{c.shop_name}</td>
+                  <td>{c.zone}</td>
+                  <td>{(c.budget_cents / 100).toFixed(2)} €</td>
+                  <td>{(c.bid_cents / 100).toFixed(2)} €</td>
+                  <td>{c.strategy === 'contextual' ? 'Contextuelle' : 'Flash'}</td>
+                  <td><StatusBadge status={c.status} /></td>
+                  <td>{new Date(c.starts_at).toLocaleDateString('fr-FR')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </AuthGuard>
   )

@@ -39,6 +39,7 @@ export default function Navbar() {
           <Link href="/dashboard">Dashboard</Link>
           <Link href="/campaigns">Campagnes</Link>
           {user.role === 'admin' && <Link href="/dashboard/admin">Admin</Link>}
+          {user.role === 'admin' && <Link href="/shops">Commerces</Link>}
         </nav>
       </div>
       <div className="header-right">
