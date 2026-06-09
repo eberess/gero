@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional
-from jose import JWTError, jwt
+import jwt
+from jwt import PyJWTError
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -48,7 +49,7 @@ def get_current_user(
         if sub is None:
             raise credentials_exception
         user_id = int(sub)
-    except (JWTError, ValueError, TypeError):
+    except (PyJWTError, ValueError, TypeError):
         raise credentials_exception
 
     user = db.query(UserDB).filter(UserDB.id == user_id).first()
