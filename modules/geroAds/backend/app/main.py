@@ -15,22 +15,7 @@ from app.auth import hash_password, verify_password, create_access_token, get_cu
 from app.llm import router as llm_router
 from datetime import datetime
 from typing import List
-
-app = FastAPI(
-    title="geroAds API",
-    description="Moteur de monétisation contextuelle pour Unitree G1 — Terminal 2F CDG",
-    version="1.0.0",
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.include_router(llm_router)
+from contextlib import asynccontextmanager
 
 
 def seed_defaults(db: Session):
@@ -68,12 +53,31 @@ def seed_defaults(db: Session):
     db.commit()
 
 
-@app.on_event("startup")
-def on_startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     init_db()
     db = next(get_db())
     seed_defaults(db)
     db.close()
+    yield
+
+
+app = FastAPI(
+    title="geroAds API",
+    description="Moteur de monétisation contextuelle pour Unitree G1 — Terminal 2F CDG",
+    version="1.0.0",
+    lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(llm_router)
 
 
 @app.get("/")
