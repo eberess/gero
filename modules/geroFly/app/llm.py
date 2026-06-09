@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException
 from app.dependencies import airlabs_client
 
 router = APIRouter(prefix="/llm", tags=["llm"])
@@ -18,7 +18,7 @@ def _time(s: str | None) -> str | None:
 async def llm_airport(iata: str = Query("CDG")):
     data = await airlabs_client.get_airport(iata.upper())
     if "error" in data:
-        return {"error": data["error"]}
+        raise HTTPException(status_code=502, detail="Erreur de l'API vols")
     return {
         "iata": data.get("iata_code"),
         "name": data.get("name"),
@@ -35,7 +35,7 @@ async def llm_airport(iata: str = Query("CDG")):
 async def llm_departures(iata: str = Query("CDG"), limit: int = Query(10, ge=1, le=50)):
     data = await airlabs_client.get_departures(iata.upper(), limit)
     if "error" in data:
-        return {"error": data["error"]}
+        raise HTTPException(status_code=502, detail="Erreur de l'API vols")
     flights = [
         {
             "flight": f.get("flight_iata"),
@@ -57,7 +57,7 @@ async def llm_departures(iata: str = Query("CDG"), limit: int = Query(10, ge=1, 
 async def llm_arrivals(iata: str = Query("CDG"), limit: int = Query(10, ge=1, le=50)):
     data = await airlabs_client.get_arrivals(iata.upper(), limit)
     if "error" in data:
-        return {"error": data["error"]}
+        raise HTTPException(status_code=502, detail="Erreur de l'API vols")
     flights = [
         {
             "flight": f.get("flight_iata"),
@@ -82,7 +82,7 @@ async def llm_live(
 ):
     data = await airlabs_client.get_live_flights(iata.upper(), direction)
     if "error" in data:
-        return {"error": data["error"]}
+        raise HTTPException(status_code=502, detail="Erreur de l'API vols")
     flights = [
         {
             "flight": f.get("flight_iata"),
@@ -104,7 +104,7 @@ async def llm_live(
 async def llm_flight(flight_iata: str = Query(...)):
     data = await airlabs_client.get_flight(flight_iata.upper())
     if "error" in data:
-        return {"error": data["error"]}
+        raise HTTPException(status_code=502, detail="Erreur de l'API vols")
     position = None
     if data.get("lat") is not None:
         position = {"lat": data["lat"], "lng": data["lng"], "alt": data.get("alt"), "speed": data.get("speed")}
@@ -139,7 +139,7 @@ async def llm_delays(
 ):
     data = await airlabs_client.get_delayed_flights(iata.upper(), direction, min_delay)
     if "error" in data:
-        return {"error": data["error"]}
+        raise HTTPException(status_code=502, detail="Erreur de l'API vols")
     delays = [
         {
             "flight": f.get("flight_iata"),
@@ -161,7 +161,7 @@ async def llm_delays(
 async def llm_airline(iata: str = Query(...)):
     data = await airlabs_client.get_airline(iata.upper())
     if "error" in data:
-        return {"error": data["error"]}
+        raise HTTPException(status_code=502, detail="Erreur de l'API vols")
     return {
         "iata": data.get("iata_code"),
         "name": data.get("name"),

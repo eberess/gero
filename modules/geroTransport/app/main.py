@@ -1,4 +1,6 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.dependencies import idfm_client, geovelo_client, velib_client, infotrafic_client, prochainspassages_client
 from app.services.geovelo_client import GeoveloClient, GeoveloBikeRequest, Waypoint
 from app.llm import router as llm_router
@@ -9,6 +11,29 @@ app = FastAPI(
     description="Module d'intelligence de transport pour Unitree G1",
     version="2.0.0"
 )
+
+GENERIC_ERRORS = {
+    400: "Requête invalide",
+    401: "Non authentifié",
+    403: "Accès refusé",
+    404: "Ressource non trouvée",
+    422: "Données invalides",
+    500: "Erreur interne du serveur",
+}
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": GENERIC_ERRORS.get(exc.status_code, "Erreur")},
+    )
+
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(status_code=500, content={"detail": GENERIC_ERRORS[500]})
+
 
 app.include_router(llm_router)
 
