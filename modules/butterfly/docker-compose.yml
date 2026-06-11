@@ -1,9 +1,9 @@
 services:
-  gero-fly:
+  gero-butterfly:
     build: .
-    container_name: gero-fly
+    container_name: gero-butterfly
     ports:
-      - "8002:8001"
+      - "8004:8003"
     env_file:
       - .env
     volumes:

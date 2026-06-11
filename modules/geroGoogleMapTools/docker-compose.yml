@@ -3,7 +3,7 @@ services:
     build: .
     container_name: gero-google-map-tools
     ports:
-      - "8002:8002"
+      - "8003:8002"
     env_file:
       - .env
     volumes:

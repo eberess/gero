@@ -1,11 +1,12 @@
 services:
-  gero-fly:
+  mailai:
     build: .
-    container_name: gero-fly
+    container_name: gero-mailai
     ports:
-      - "8002:8001"
+      - "8005:8004"
     env_file:
       - .env
     volumes:
+      - ./data:/app/data
       - .:/app
     restart: unless-stopped
