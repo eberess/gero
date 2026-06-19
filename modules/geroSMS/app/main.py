@@ -6,7 +6,8 @@ from app.dependencies import sms_config
 from app.services.sms_gateway_client import SMSGatewayClient
 from app.services import contacts as cts
 from app.services import history as hist
-from app.models import ContactCreate, ContactUpdate, SendSMSRequest, SendSMSBatchRequest
+from app.services import masters as mst
+from app.models import ContactCreate, ContactUpdate, MasterCreate, MasterUpdate, SendSMSRequest, SendSMSBatchRequest
 from app.llm import router as llm_router
 
 app = FastAPI(
@@ -169,3 +170,40 @@ async def get_history_entry(entry_id: int):
     if not entry:
         raise HTTPException(status_code=404, detail="Entrée introuvable")
     return {"data": entry}
+
+
+@app.get("/masters")
+async def list_masters(active_only: bool = Query(False)):
+    return {"data": mst.list_masters(active_only)}
+
+
+@app.get("/masters/{master_id}")
+async def get_master(master_id: int):
+    master = mst.get_master(master_id)
+    if not master:
+        raise HTTPException(status_code=404, detail="Numéro maître introuvable")
+    return {"data": master}
+
+
+@app.post("/masters")
+async def create_master(req: MasterCreate):
+    existing = mst.get_master_by_phone(req.phone)
+    if existing:
+        raise HTTPException(status_code=409, detail="Ce numéro existe déjà comme maître")
+    master = mst.create_master(req.name, req.phone, req.notes)
+    return {"data": master}
+
+
+@app.put("/masters/{master_id}")
+async def update_master(master_id: int, req: MasterUpdate):
+    master = mst.update_master(master_id, req.name, req.phone, req.notes, req.active)
+    if not master:
+        raise HTTPException(status_code=404, detail="Numéro maître introuvable")
+    return {"data": master}
+
+
+@app.delete("/masters/{master_id}")
+async def delete_master(master_id: int):
+    if not mst.delete_master(master_id):
+        raise HTTPException(status_code=404, detail="Numéro maître introuvable")
+    return {"data": {"deleted": True}}

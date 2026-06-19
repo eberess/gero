@@ -13,6 +13,19 @@ class ContactUpdate(BaseModel):
     notes: str = ""
 
 
+class MasterCreate(BaseModel):
+    name: str
+    phone: str
+    notes: str = ""
+
+
+class MasterUpdate(BaseModel):
+    name: str
+    phone: str
+    notes: str = ""
+    active: bool = True
+
+
 class SendSMSRequest(BaseModel):
     phone: str
     message: str

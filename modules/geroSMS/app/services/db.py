@@ -44,6 +44,16 @@ def _migrate(conn: sqlite3.Connection) -> None:
         CREATE INDEX IF NOT EXISTS idx_contacts_name ON contacts(name);
         CREATE INDEX IF NOT EXISTS idx_history_created_at ON history(created_at);
         CREATE INDEX IF NOT EXISTS idx_history_status ON history(status);
+        CREATE TABLE IF NOT EXISTS masters (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            name        TEXT    NOT NULL,
+            phone       TEXT    NOT NULL UNIQUE,
+            notes       TEXT    DEFAULT '',
+            active      INTEGER NOT NULL DEFAULT 1,
+            created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
+            updated_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_masters_phone ON masters(phone);
     """)
     conn.commit()
 
