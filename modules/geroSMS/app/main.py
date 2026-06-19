@@ -22,6 +22,7 @@ GENERIC_ERRORS = {
     404: "Ressource non trouvée",
     422: "Données invalides",
     500: "Erreur interne du serveur",
+    502: "Erreur de la passerelle SMS",
 }
 
 gateway = SMSGatewayClient()
@@ -31,7 +32,7 @@ gateway = SMSGatewayClient()
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     return JSONResponse(
         status_code=exc.status_code,
-        content={"detail": GENERIC_ERRORS.get(exc.status_code, "Erreur")},
+        content={"detail": exc.detail or GENERIC_ERRORS.get(exc.status_code, "Erreur")},
     )
 
 

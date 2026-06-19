@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 @dataclass
 class SMSConfig:
     gateway_url: str = "http://sms-gateway:3000"
+    gateway_api_prefix: str = ""
     gateway_username: str = ""
     gateway_password: str = ""
     sms_scopes: list[str] = field(default_factory=lambda: ["messages:send", "messages:read", "messages:list"])
@@ -30,6 +31,7 @@ def load_config() -> SMSConfig:
     _config.db_path = env_db if env_db else f"{base_dir}/data/gerosms.db"
 
     _config.gateway_url = os.getenv("SMS_GATEWAY_URL", "http://sms-gateway:3000")
+    _config.gateway_api_prefix = os.getenv("SMS_GATEWAY_API_PREFIX", "")
     _config.gateway_username = os.getenv("SMS_GATEWAY_USERNAME", "")
     _config.gateway_password = os.getenv("SMS_GATEWAY_PASSWORD", "")
 
