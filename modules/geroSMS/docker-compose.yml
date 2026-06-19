@@ -1,0 +1,17 @@
+services:
+  gero-sms:
+    build: .
+    container_name: gero-sms
+    ports:
+      - "8006:8005"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    restart: unless-stopped
+    networks:
+      - proxy-network
+
+networks:
+  proxy-network:
+    external: true
